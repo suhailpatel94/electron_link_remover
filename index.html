@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Html parse</title>
+    <script>
+        window.$ = window.jQuery = require('./bower_components/jquery/dist/jquery.js');
+    </script>
+    <link rel="stylesheet" href="./bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <script src="./bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="page-header">
+            <h1>File Operation</h1>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-xs-3">
+                <button type="button" class="btn btn-default" id="filebtn" onclick="openDialog()">Open</button>
+            </div>
+            <div id="holder" class="col-md-9 col-xs-9">
+                <div class="panel panel-default">
+                    <div class="panel-body">Drag your file here</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        
+        document.addEventListener('dragover', function (event) {
+            event.preventDefault();
+            return false;
+        }, false);
+        document.addEventListener('drop', function (event) {
+            event.preventDefault();
+            return false;
+        }, false);
+        
+        var fs = require('fs');
+        var path = require('path');
+        var filePath;
+        var htmldata;
+        var all_a;
+        const {
+            dialog
+        } = require('electron').remote;
+        
+        
+        //Drag and drop logic handler
+        const holder = document.getElementById('holder')
+        holder.ondragover = () => {
+            return false;
+        }
+        holder.ondragleave = holder.ondragend = () => {
+            return false;
+        }
+        holder.ondrop = (e) => {
+                e.preventDefault()
+                for (let f of e.dataTransfer.files) {
+                    console.log('File(s) you dragged here: ', f.path)
+                    removeLinks(f.path);
+                }
+                return false;
+            }
+            //------------------end
+        
+        
+        function openDialog() {
+            filePath = dialog.showOpenDialog({
+                properties: ['openFile']
+            });
+            filePath=filePath[0];
+            removeLinks(filePath);
+        }
+
+        function removeLinks(file_path) {
+            var content = fs.readFileSync(file_path).toString();
+            console.log(file_path);
+            var htmlString = content.replace(/(<a.*)(href=".*")([^>]*>)/g, "$1href=\"#\"$3");
+            fs.writeFileSync(file_path, htmlString)
+        }
+        
+    </script>
+</body>
+
+</html>
